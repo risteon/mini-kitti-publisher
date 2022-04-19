@@ -91,17 +91,17 @@ if __name__ == '__main__':
         img_name = frame_num_str + '.png'
 
         # pub images
-        grayleftimg_path = os.path.join(grayleftimg_dir, img_name)
-        grayleftimg_publisher.publish( bridge.cv2_to_imgmsg(cv2.imread(grayleftimg_path), 'bgr8') )
+        # grayleftimg_path = os.path.join(grayleftimg_dir, img_name)
+        # grayleftimg_publisher.publish( bridge.cv2_to_imgmsg(cv2.imread(grayleftimg_path), 'bgr8') )
 
-        grayrightimg_path = os.path.join(grayrightimg_dir, img_name)
-        grayrightimg_publisher.publish( bridge.cv2_to_imgmsg(cv2.imread(grayrightimg_path), 'bgr8') )
+        # grayrightimg_path = os.path.join(grayrightimg_dir, img_name)
+        # grayrightimg_publisher.publish( bridge.cv2_to_imgmsg(cv2.imread(grayrightimg_path), 'bgr8') )
 
-        colorleftimg_path = os.path.join(colorleftimg_dir, img_name)
-        colorleftimg_publisher.publish( bridge.cv2_to_imgmsg(cv2.imread(colorleftimg_path), 'bgr8') )
+        # colorleftimg_path = os.path.join(colorleftimg_dir, img_name)
+        # colorleftimg_publisher.publish( bridge.cv2_to_imgmsg(cv2.imread(colorleftimg_path), 'bgr8') )
 
-        colorrightimg_path = os.path.join(colorrightimg_dir, img_name)
-        colorrightimg_publisher.publish( bridge.cv2_to_imgmsg(cv2.imread(colorrightimg_path), 'bgr8') )
+        # colorrightimg_path = os.path.join(colorrightimg_dir, img_name)
+        # colorrightimg_publisher.publish( bridge.cv2_to_imgmsg(cv2.imread(colorrightimg_path), 'bgr8') )
 
         # pub velodyne scan 
         scan_path = os.path.join(scan_dir, scan_names[frame_idx])
