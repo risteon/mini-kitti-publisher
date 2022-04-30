@@ -23,7 +23,7 @@ args = parser.parse_args()
 
 
 def makePointCloud2Msg(points, frame_time, parent_frame, pcd_format):
-    ros_dtype = sensor_msgs.PointField.FLOAT33
+    ros_dtype = sensor_msgs.PointField.FLOAT32
 
     dtype = np.float32
     itemsize = np.dtype(dtype).itemsize
