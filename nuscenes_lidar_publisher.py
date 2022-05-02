@@ -73,7 +73,8 @@ def load_from_file(file_name):
 
     # replace all close points (<1.5m) with nan.
     # (does nuscenes map the invalid points to ~(0, 0, 0)? )
-    mask = np.linalg.norm(scan[:, :3], axis=-1) < 1.5
+    # mask = np.linalg.norm(scan[:, :3], axis=-1) < 1.5
+    mask = np.linalg.norm(scan[:, :3], axis=-1) < 1.8
     scan[mask, :] = float("nan")
 
     row, row_lengths = np.unique(ring_index, return_counts=True)
