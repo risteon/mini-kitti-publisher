@@ -97,7 +97,8 @@ if __name__ == '__main__':
     nusc = NuScenes(version=args.version, dataroot=args.nuscenes_dir, verbose=True)
 
     rospy.init_node('NuscenesLidarPublisher')
-    r = rospy.Rate(20)
+    # r = rospy.Rate(20)
+    r = rospy.Rate(10)
 
     scan_publisher = rospy.Publisher('velodyne_points', sensor_msgs.PointCloud2,
                                      queue_size=100)
