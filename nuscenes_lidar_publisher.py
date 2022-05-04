@@ -19,6 +19,7 @@ parser.add_argument('--version', metavar='DIR', default="v1.0-trainval",
                     help='nuscenes dataset version')
 parser.add_argument('--scene', metavar='STR', default="",
                     help='scene to publish')
+parser.add_argument('--rate', metavar='Hz', default=10)
 args = parser.parse_args()
 
 
@@ -98,8 +99,9 @@ if __name__ == '__main__':
     nusc = NuScenes(version=args.version, dataroot=args.nuscenes_dir, verbose=True)
 
     rospy.init_node('NuscenesLidarPublisher')
+    # original NuScenes frequency is 20
     # r = rospy.Rate(20)
-    r = rospy.Rate(10)
+    r = rospy.Rate(int(args.rate))
 
     scan_publisher = rospy.Publisher('velodyne_points', sensor_msgs.PointCloud2,
                                      queue_size=100)
@@ -145,7 +147,11 @@ if __name__ == '__main__':
 
         next_sample_token = lidar_sample_data["next"]
 
-    for seq, scan in tqdm.tqdm(enumerate(scans)):
+    for seq, scan in enumerate(tqdm.tqdm(scans)):
         scan_publisher.publish(makePointCloud2Msg(scan[0], scan[1], "KITTI",
                                                   ['x', 'y', 'z', 'intensity'], seq))
+
+        if rospy.is_shutdown():
+            break
+            
         r.sleep()
