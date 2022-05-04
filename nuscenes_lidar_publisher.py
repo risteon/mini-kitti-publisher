@@ -22,7 +22,7 @@ parser.add_argument('--scene', metavar='STR', default="",
 args = parser.parse_args()
 
 
-def makePointCloud2Msg(points, frame_time, parent_frame, pcd_format):
+def makePointCloud2Msg(points, frame_time, parent_frame, pcd_format, seq):
     ros_dtype = sensor_msgs.PointField.FLOAT32
 
     dtype = np.float32
@@ -38,7 +38,8 @@ def makePointCloud2Msg(points, frame_time, parent_frame, pcd_format):
     secs = frame_time // 1000000
     nsecs = (frame_time - (secs * 1000000)) * 1000
     header = std_msgs.Header(frame_id=parent_frame,
-                             stamp=rospy.Time(secs=frame_time // 1000000, nsecs=nsecs))
+                             stamp=rospy.Time(secs=frame_time // 1000000, nsecs=nsecs),
+                             seq=seq)
 
     num_field = len(pcd_format)
     return sensor_msgs.PointCloud2(
@@ -86,7 +87,7 @@ def load_from_file(file_name):
     lidar_image = np.empty(shape=(h, w, 4), dtype=np.float32)
     row_begins = np.concatenate(([0], np.cumsum(row_lengths[:-1])))
     for r, l, start in zip(row, row_lengths, row_begins):
-        lidar_image[r, :l, :] = scan[start:start+l, :]
+        lidar_image[r, :l, :] = scan[start:start + l, :]
         lidar_image[r, l:, :] = float("nan")
 
     return lidar_image
@@ -144,7 +145,7 @@ if __name__ == '__main__':
 
         next_sample_token = lidar_sample_data["next"]
 
-    for scan in tqdm.tqdm(scans):
+    for seq, scan in tqdm.tqdm(enumerate(scans)):
         scan_publisher.publish(makePointCloud2Msg(scan[0], scan[1], "KITTI",
-                                                  ['x', 'y', 'z', 'intensity']))
+                                                  ['x', 'y', 'z', 'intensity'], seq))
         r.sleep()
