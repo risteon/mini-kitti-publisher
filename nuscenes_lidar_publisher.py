@@ -3,10 +3,8 @@
 import rospy
 import sensor_msgs.msg as sensor_msgs
 import std_msgs.msg as std_msgs
-import geometry_msgs.msg
 
 from nuscenes.nuscenes import NuScenes
-from nuscenes.utils.data_classes import LidarPointCloud
 
 import argparse
 
@@ -94,6 +92,30 @@ def load_from_file(file_name):
     return lidar_image
 
 
+def get_lidar_scans_of_scene(nusc, scene):
+    # list((timestamp [us], point cloud))
+    scans = []
+
+    sample = nusc.get("sample", scene["first_sample_token"])
+    next_sample_token: str = sample["data"]["LIDAR_TOP"]
+
+    while next_sample_token:
+
+        lidar_sample_data = nusc.get("sample_data", next_sample_token)
+        # data_path, _, _ = nusc.get_sample_data(next_sample_token)
+        data_path = nusc.get_sample_data_path(next_sample_token)
+
+        # POINT CLOUD [(x y z I) x P]. Intensity from 0.0 to 255.0
+        point_cloud = load_from_file(data_path)
+        if point_cloud.dtype != np.float32:
+            raise RuntimeError("Point cloud has wrong data type.")
+        # [P x (x y z I)]
+        scans.append((point_cloud, lidar_sample_data["timestamp"]))
+        next_sample_token = lidar_sample_data["next"]
+
+    return scans
+
+
 if __name__ == '__main__':
 
     nusc = NuScenes(version=args.version, dataroot=args.nuscenes_dir, verbose=True)
@@ -107,7 +129,6 @@ if __name__ == '__main__':
                                      queue_size=100)
 
     #
-
     scene = None
     try:
         if args.scene:
@@ -127,25 +148,7 @@ if __name__ == '__main__':
     print(f"The scene has {nbr_samples} samples.")
 
     # list((timestamp [us], point cloud))
-    scans = []
-
-    sample = nusc.get("sample", scene["first_sample_token"])
-    next_sample_token: str = sample["data"]["LIDAR_TOP"]
-
-    while next_sample_token:
-
-        lidar_sample_data = nusc.get("sample_data", next_sample_token)
-        # data_path, _, _ = nusc.get_sample_data(next_sample_token)
-        data_path = nusc.get_sample_data_path(next_sample_token)
-
-        # POINT CLOUD [(x y z I) x P]. Intensity from 0.0 to 255.0
-        point_cloud = load_from_file(data_path)
-        if point_cloud.dtype != np.float32:
-            raise RuntimeError("Point cloud has wrong data type.")
-        # [P x (x y z I)]
-        scans.append((point_cloud, lidar_sample_data["timestamp"]))
-
-        next_sample_token = lidar_sample_data["next"]
+    scans = get_lidar_scans_of_scene(nusc, scene)
 
     for seq, scan in enumerate(tqdm.tqdm(scans)):
         scan_publisher.publish(makePointCloud2Msg(scan[0], scan[1], "KITTI",
@@ -153,5 +156,5 @@ if __name__ == '__main__':
 
         if rospy.is_shutdown():
             break
-            
+
         r.sleep()
